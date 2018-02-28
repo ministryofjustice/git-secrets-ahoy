@@ -3,7 +3,7 @@
 log_prefix='Pre-push hook: '
 
 echo "${log_prefix}RUNNING truffleHog to test for leaked secrets."
-docker run -t --rm -v "$PWD:/git" git-secrets-ahoy --since_commit $(git rev-parse origin/HEAD)
+docker run -t --rm -v "$PWD:/git" mojdigitalstudio/git-secrets-ahoy --since_commit $(git rev-parse origin/HEAD)
 exit_code=$?
 
 if [ $exit_code -ne 0 ]; then
