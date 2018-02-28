@@ -9,6 +9,8 @@ exit_code=$?
 if [ $exit_code -ne 0 ]; then
   echo "${log_prefix}WARNING truffleHog found some suspicious commits containing possible secrets\n\n"
   echo "${log_prefix}ABORTING push, to override run: git push --no-verify"
+  exit 1
 else
   echo "${log_prefix}OK proceeding with push"
+  exit 0
 fi
