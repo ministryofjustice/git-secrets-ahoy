@@ -1,0 +1,13 @@
+#!/bin/bash
+
+log_prefix='Post-commit hook: '
+
+echo "${log_prefix}RUNNING truffleHog to test for leaked secrets."
+docker run -t --rm -v "$PWD:/git" git-secrets-ahoy --since_commit $(git rev-parse HEAD~1)
+exit_code=$?
+
+if [ $exit_code -ne 0 ]; then
+  echo "${log_prefix}WARNING truffleHog found some suspicious commits containing possible secrets\n\n"
+else
+  echo "${log_prefix}OK truffleHog did not find anything suspicious"
+fi
