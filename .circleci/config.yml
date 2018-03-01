@@ -6,10 +6,7 @@ jobs:
       - image: docker:17.05.0-ce-git
     working_directory: /app
     steps:
-      - run:
-          name: Generate Build version
-          command: |
-            echo "export BUILD_VERSION=$(date +%Y%m%d%H%M)-$CIRCLE_BUILD_NUM" >> $BASH_ENV
+      - run: echo 'export BUILD_VERSION=$(date +%Y%m%d%H%M)-$CIRCLE_BUILD_NUM' >> $BASH_ENV
       - checkout
       - setup_remote_docker
       - deploy:
