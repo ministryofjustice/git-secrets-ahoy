@@ -16,6 +16,7 @@ jobs:
           name: Push to Docker Hub
           command: |
             if [ "${CIRCLE_BRANCH}" == "master" ]; then
+              echo "$BUILD_VERSION"
               docker build . \
                 --tag "mojdigitalstudio/git-secrets-ahoy:$BUILD_VERSION" \
                 --label "maintainer=noms-studio-webops@digital.justice.gov.uk" \
