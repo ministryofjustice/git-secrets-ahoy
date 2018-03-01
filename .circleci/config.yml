@@ -3,7 +3,7 @@ version: 2
 jobs:
   build:
     docker:
-      - image: circleci/node:6
+      - image: circleci/python:3
     working_directory: ~/app
     steps:
       - run:
@@ -25,5 +25,5 @@ jobs:
                 --label "build.url=$CIRCLE_BUILD_URL" \
                 --label "build.gitref=$CIRCLE_SHA1"
               docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
-              docker push mojdigitalstudio/git-secrets-ahoy:$BUILD_VERSION
+              docker push mojdigitalstudio/git-secrets-ahoy
             fi
