@@ -3,13 +3,13 @@ version: 2
 jobs:
   build:
     docker:
-      - image: docker:17.05.0-ce-git
-    working_directory: /app
+      - image: circleci/node:6
+    working_directory: ~/app
     steps:
       - run:
           name: Generate Build version
           command: |
-            echo "export BUILD_VERSION=$(date +%Y%m%d%H%M)-$CIRCLE_BUILD_NUM" >> $BASH_ENV
+            echo 'export BUILD_VERSION=$(date +%Y%m%d%H%M)-$CIRCLE_BUILD_NUM' >> $BASH_ENV
       - checkout
       - setup_remote_docker
       - deploy:
@@ -23,6 +23,6 @@ jobs:
                 --label "build.number=$CIRCLE_BUILD_NUM" \
                 --label "build.url=$CIRCLE_BUILD_URL" \
                 --label "build.gitref=$CIRCLE_SHA1"
-              docker login -e $DOCKER_EMAIL -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
+              docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
               docker push mojdigitalstudio/git-secrets-ahoy:$BUILD_VERSION
             fi
