@@ -19,6 +19,7 @@ jobs:
               echo "$BUILD_VERSION"
               docker build . \
                 --tag "mojdigitalstudio/git-secrets-ahoy:$BUILD_VERSION" \
+                --tag "mojdigitalstudio/git-secrets-ahoy:latest" \
                 --label "maintainer=noms-studio-webops@digital.justice.gov.uk" \
                 --label "build.number=$CIRCLE_BUILD_NUM" \
                 --label "build.url=$CIRCLE_BUILD_URL" \
