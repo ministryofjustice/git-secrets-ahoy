@@ -1,0 +1,27 @@
+version: 2
+
+jobs:
+  build:
+    docker:
+      - image: docker:17.05.0-ce-git
+    working_directory: /app
+    steps:
+      - run:
+          name: Generate Build version
+          command: |
+            echo "export BUILD_VERSION=$(date +%Y%m%d%H%M)-$CIRCLE_BUILD_NUM" >> $BASH_ENV
+      - checkout
+      - setup_remote_docker
+      - deploy:
+          name: Push to Docker Hub
+          command: |
+            if [ "${CIRCLE_BRANCH}" == "master" ]; then
+              docker build . \
+                --tag "mojdigitalstudio/git-secrets-ahoy:$BUILD_VERSION" \
+                --label "maintainer=noms-studio-webops@digital.justice.gov.uk" \
+                --label "build.number=$CIRCLE_BUILD_NUM" \
+                --label "build.url=$CIRCLE_BUILD_URL" \
+                --label "build.gitref=$CIRCLE_SHA1"
+              docker login -e $DOCKER_EMAIL -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
+              docker push mojdigitalstudio/git-secrets-ahoy:$BUILD_VERSION
+            fi
