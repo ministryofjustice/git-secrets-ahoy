@@ -8,7 +8,7 @@ docker run -t --rm -v "$PWD:/git" mojdigitalstudio/git-secrets-ahoy --use_curren
 exit_code=$?
 
 if [[ $exit_code -ne 0 ]]; then
-  echo "${log_prefix}${red_warning} truffleHog found some suspicious commits containing possible secrets"
+  echo -e "${log_prefix}${red_warning} truffleHog found some suspicious commits containing possible secrets"
   echo "${log_prefix}You can undo this commit: git reset HEAD~1"
 else
   echo "${log_prefix}OK truffleHog did not find anything suspicious"
