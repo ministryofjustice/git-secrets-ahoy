@@ -46,6 +46,21 @@ docker run -t --rm -v "$PWD:/git" mojdigitalstudio/git-secrets-ahoy <args>
 
 ## Usage
 
+```
+git-secrets-ahoy [options] [<git-repo>]
+
+options:
+  --json                        output in JSON
+  --junit-xml                   output in JUnit-style XML
+  --no-entropy                  disable high entropy checks
+  --entropy-length=<length>     override min word length for entropy check
+  --entropy-base64=<limit>      override the threshold for base64 entropy
+  --entropy-hex=<limit>         override the threshold for hex entropy
+  --no-regex                    disable regex checks
+  --no-default-rules            disable default regex rules
+  --extra-rules=<rule file>     specify JSON file containing more regex rules
+```
+
 ### Specifying which commits to scan
 
 Selecting commits to scan is mostly done via the `--revs` or `--one-rev` arguments, which take similar input to the `git log` command. All matching revisions will be scanned.
