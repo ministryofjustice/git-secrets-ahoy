@@ -107,3 +107,16 @@ Just displays a warning if you commit something potentially sensitive.  You can 
 
 ### pre-push
 If truffleHog finds potentially sensitive data in your commits, the hook will abort the push.  You have the option to disregard and push again with the `--no-verify` option, which will skip the pre-push hook.
+
+
+## Developing
+
+### Requirements
+
+* Python 3.5+
+* pipenv
+
+```
+pipenv install
+pipenv shell
+```
