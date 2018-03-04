@@ -17,7 +17,12 @@ def main():
 
 
 def parse_args():
-    pass
+    parser = argparse.ArgumentParser()
+    parser.add_argument('git_repo',
+        type=str, default=".", nargs='?',
+        help='Path to git repository')
+    args = parser.parse_args()
+    return Context(args.git_repo)
 
 
 def scan_repo(context):
