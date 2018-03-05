@@ -45,6 +45,12 @@
             ],
             "version": "==2.1.8"
         },
+        "plain-obj": {
+            "hashes": [
+                "sha256:321ecd8362795bdb82a3b67ad4bf375eae55041124d42953fac4c9efc22354ee"
+            ],
+            "version": "==0.1.2"
+        },
         "smmap2": {
             "hashes": [
                 "sha256:b78ee0f1f5772d69ff50b1cbdb01b8c6647a8354f02f23b488cf4b2cfc923956",
