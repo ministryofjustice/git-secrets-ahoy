@@ -43,7 +43,8 @@ def scan_repo(context):
 
 
 def find_relevant_commits(repo):
-    return repo.iter_commits()
+    if repo.head.is_valid():
+        yield from repo.iter_commits()
 
 
 def find_secrets(commits):
