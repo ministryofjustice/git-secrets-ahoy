@@ -1,24 +1,40 @@
 version: 2
 
-# TODO: circleci workflows
+workflows:
+  version: 2
+  flow:
+    jobs:
+      - test
+      - container:
+          filters:
+            branches:
+              only: master
+
+defaults: &defaults
+  docker:
+    - image: circleci/python:3.6
+  working_directory: ~/app
+
 jobs:
-  build:
-    docker:
-      - image: circleci/python:3
-    working_directory: ~/app
+  test:
+    <<: *defaults
     steps:
-      - run:
-          name: Generate Build version
-          command: |
-            echo 'export BUILD_VERSION=$(date +%Y%m%d%H%M)-$CIRCLE_BUILD_NUM' >> $BASH_ENV
       - checkout
-      # TODO: cache/restore ~/.cache and ~/.local
+      - restore_cache:
+          keys:
+            - cache-{{ checksum "Pipfile.lock" }}
+            - cache-
       - run:
           name: Setup python dependencies
           command: |
             pip install --user pipenv
             PATH=~/.local/bin:$PATH
             pipenv sync --dev
+      - save_cache:
+          key: cache-{{ checksum "Pipfile.lock" }}
+          paths:
+            - ~/.local
+            - ~/.cache
       - run:
           name: Execute python tests
           command: |
@@ -26,19 +42,26 @@ jobs:
             pipenv run pytest --junit-xml=test-results/junit.xml
       - store_test_results:
           path: test-results
+
+  container:
+    <<: *defaults
+    steps:
+      - checkout
+      - run:
+          name: Generate Build version
+          command: |
+            echo 'export BUILD_VERSION=$(date +%Y%m%d%H%M)-$CIRCLE_BUILD_NUM' >> $BASH_ENV
       - setup_remote_docker
       - deploy:
           name: Push to Docker Hub
           command: |
-            if [ "${CIRCLE_BRANCH}" == "master" ]; then
-              echo "$BUILD_VERSION"
-              docker build . \
-                --tag "mojdigitalstudio/git-secrets-ahoy:$BUILD_VERSION" \
-                --tag "mojdigitalstudio/git-secrets-ahoy:latest" \
-                --label "maintainer=noms-studio-webops@digital.justice.gov.uk" \
-                --label "build.number=$CIRCLE_BUILD_NUM" \
-                --label "build.url=$CIRCLE_BUILD_URL" \
-                --label "build.gitref=$CIRCLE_SHA1"
-              docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
-              docker push mojdigitalstudio/git-secrets-ahoy
-            fi
+            echo "$BUILD_VERSION"
+            docker build . \
+              --tag "mojdigitalstudio/git-secrets-ahoy:$BUILD_VERSION" \
+              --tag "mojdigitalstudio/git-secrets-ahoy:latest" \
+              --label "maintainer=noms-studio-webops@digital.justice.gov.uk" \
+              --label "build.number=$CIRCLE_BUILD_NUM" \
+              --label "build.url=$CIRCLE_BUILD_URL" \
+              --label "build.gitref=$CIRCLE_SHA1"
+            docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
+            docker push mojdigitalstudio/git-secrets-ahoy
