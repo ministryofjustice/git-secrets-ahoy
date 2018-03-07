@@ -1,5 +1,6 @@
 version: 2
 
+# TODO: circleci workflows
 jobs:
   build:
     docker:
@@ -11,6 +12,20 @@ jobs:
           command: |
             echo 'export BUILD_VERSION=$(date +%Y%m%d%H%M)-$CIRCLE_BUILD_NUM' >> $BASH_ENV
       - checkout
+      # TODO: cache/restore ~/.cache and ~/.local
+      - run:
+          name: Setup python dependencies
+          command: |
+            pip install --user pipenv
+            PATH=~/.local/bin:$PATH
+            pipenv sync --dev
+      - run:
+          name: Execute python tests
+          command: |
+            PATH=~/.local/bin:$PATH
+            pipenv run pytest --junit-xml=test-results/junit.xml
+      - store_test_results:
+          path: test-results
       - setup_remote_docker
       - deploy:
           name: Push to Docker Hub
