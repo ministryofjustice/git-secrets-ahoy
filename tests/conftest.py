@@ -43,4 +43,4 @@ def git_add(git_repo, filename, contents):
 
 
 def build_context(git_repo):
-    return gsa.Context(git_repo=git_repo.working_tree_dir)
+    return gsa.parse_args([git_repo.working_tree_dir])

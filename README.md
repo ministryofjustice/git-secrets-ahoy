@@ -65,24 +65,24 @@ options:
 
 Selecting commits to scan is mostly done via the `--revs` or `--one-rev` arguments, which take similar input to the `git log` command. All matching revisions will be scanned.
 
-To scan a single commit
-```
---one-rev <commit-hash>
-```
-
 To scan a series of commits
 ```
---revs <commit-from>..<commit-to>
-```
-
-To scan the last few weeks of commits
-```
---revs master@{2 weeks ago}..HEAD
+--since <commit-from> --until <commit-to>
 ```
 
 To scan the whole commit history of a branch
 ```
---revs <commit-hash>
+--until <branch-ref>
+```
+
+To scan commits since a known good point
+```
+--since <commit-from>
+```
+
+To scan a single commit
+```
+--ref <commit-hash>
 ```
 
 To scan staged but uncomitted changes
@@ -106,7 +106,7 @@ bash <(curl -fsSL https://raw.githubusercontent.com/ministryofjustice/git-secret
 Just displays a warning if you commit something potentially sensitive.  You can optionally revert your commit at this stage e.g. before you push it to a public repo.
 
 ### pre-push
-If truffleHog finds potentially sensitive data in your commits, the hook will abort the push.  You have the option to disregard and push again with the `--no-verify` option, which will skip the pre-push hook.
+If we find potentially sensitive data in your commits, the hook will abort the push.  You have the option to disregard and push again with the `--no-verify` option, which will skip the pre-push hook.
 
 
 ## Developing

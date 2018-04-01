@@ -2,11 +2,12 @@ import argparse
 from datetime import datetime
 import json
 import math
+import sys
 
 import git
 import plain_obj
 
-Context = plain_obj.new_type('Context', ['git_repo'])
+Context = plain_obj.new_type('Context', ['path', 'target'])
 DiffSecret = plain_obj.new_type(
     'DiffSecret',
     ['diff', 'path', 'patch', 'matches', 'reason']
@@ -18,8 +19,8 @@ CommitSecret = plain_obj.new_type(
 )
 
 
-def main():
-    context = parse_args()
+def main(args=sys.argv):
+    context = parse_args(args)
     secrets = scan_repo(context)
     output = format_output(secrets)
     for chunk in output:
@@ -27,17 +28,23 @@ def main():
     return 0 if not secrets else 1
 
 
-def parse_args():
+def parse_args(args):
     parser = argparse.ArgumentParser()
-    parser.add_argument('git_repo',
+    parser.add_argument('path',
                         type=str, default=".", nargs='?',
                         help='Path to git repository')
-    args = parser.parse_args()
-    return Context(args.git_repo)
+    parser.add_argument('--staged',
+                        action='store_true',
+                        help='Check changes staged into the git index')
+    parsed = parser.parse_args(args)
+    return Context(
+        path=parsed.path,
+        target=("staged",)
+    )
 
 
 def scan_repo(context):
-    repo = git.Repo(context.git_repo)
+    repo = git.Repo(context.path)
     commits = find_relevant_commits(repo)
     return find_secrets(commits)
 
@@ -99,8 +106,8 @@ def check_entropy(diff_obj, patch):
 def collect_entropic_strings(patch):
     for line in patch.split("\n"):
         # Only check lines introduced in this patch
-        if not line.startswith("+"):
-            continue
+        # if not line.startswith("+"):
+        #     continue
         for word in line[1:].split():
             for string in entropic_strings(word, BASE64_CHARS, 4.5):
                 yield string
@@ -160,6 +167,4 @@ def format_output(secrets):
 
 
 if __name__ == '__main__':
-    import sys
-    code = main()
-    sys.exit(code)
+    sys.exit(main())
