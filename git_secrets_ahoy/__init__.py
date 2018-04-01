@@ -7,19 +7,10 @@ import sys
 import git
 import plain_obj
 
-Context = plain_obj.new_type('Context', ['path', 'target'])
-DiffSecret = plain_obj.new_type(
-    'DiffSecret',
-    ['diff', 'path', 'patch', 'matches', 'reason']
-)
-DiffSecret.ENTROPY = 'high-entropy'
-CommitSecret = plain_obj.new_type(
-    'CommitSecret',
-    ['commit', 'ref', 'datetime', 'message'] + DiffSecret.__slots__
-)
+from git_secrets_ahoy import types
 
 
-def main(args=sys.argv):
+def main(args=sys.argv[1:]):
     context = parse_args(args)
     secrets = scan_repo(context)
     output = format_output(secrets)
@@ -37,7 +28,7 @@ def parse_args(args):
                         action='store_true',
                         help='Check changes staged into the git index')
     parsed = parser.parse_args(args)
-    return Context(
+    return types.Context(
         path=parsed.path,
         target=("staged",)
     )
@@ -56,15 +47,8 @@ def find_relevant_commits(repo):
 
 def find_secrets(commits):
     for commit in commits:
-        commit_datetime = datetime.fromtimestamp(commit.committed_date)
         for diff_secret in check_commit(commit):
-            yield CommitSecret(
-                commit=commit,
-                ref=commit.hexsha,
-                datetime=commit_datetime,
-                message=commit.message,
-                **diff_secret.to_dict()
-            )
+            yield types.Secret(commit=commit, **diff_secret)
 
 
 def check_commit(commit):
@@ -93,13 +77,12 @@ def listify(func):
 def check_entropy(diff_obj, patch):
     matches = collect_entropic_strings(patch)
     if matches:
-        yield DiffSecret(
-            diff=diff_obj,
-            path=diff_obj.b_path if diff_obj.b_path else diff_obj.a_path,
-            patch=patch,
-            matches=matches,
-            reason=DiffSecret.ENTROPY
-        )
+        yield {
+            "diff": diff_obj,
+            "patch": patch,
+            "matches": matches,
+            "reason": types.SecretReason.ENTROPY,
+        }
 
 
 @listify
@@ -147,15 +130,6 @@ def shannon_entropy(data, iterator):
     return entropy
 
 
-class JSONEncoder(json.JSONEncoder):
-    def default(self, obj):
-        if isinstance(obj, CommitSecret):
-            return without(obj.to_dict(), "commit", "diff")
-        if isinstance(obj, datetime):
-            return obj.isoformat()
-        return super().default(obj)
-
-
 def without(d, *keys):
     for key in keys: d.pop(key)
     return d
@@ -163,7 +137,18 @@ def without(d, *keys):
 
 def format_output(secrets):
     for secret in secrets:
-        yield json.dumps(secret, indent=2, cls=JSONEncoder)
+        yield json.dumps(
+            indent=2,
+            obj={
+                "ref": secret.ref,
+                "datetime": secret.datetime.isoformat(),
+                "message": secret.message,
+                "path": secret.path,
+                "patch": secret.patch,
+                "matches": secret.matches,
+                "reason": secret.reason.value,
+            }
+        )
 
 
 if __name__ == '__main__':

@@ -35,7 +35,7 @@ def test_one_commit_with_high_entropy(git_repo, secret1):
     assert secrets[0].path == "secret.txt"
     assert secret1 in secrets[0].patch
     assert secrets[0].matches == [secret1]
-    assert secrets[0].reason == "high-entropy"
+    assert secrets[0].reason == gsa.types.SecretReason.ENTROPY
 
 def test_one_commit_benign(git_repo):
     T.git_add(git_repo, "secret.txt", "Everything is awesome")
