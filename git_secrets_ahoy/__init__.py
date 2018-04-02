@@ -5,7 +5,6 @@ import math
 import sys
 
 import git
-import plain_obj
 
 from git_secrets_ahoy import types
 

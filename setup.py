@@ -20,7 +20,6 @@ setup(
     python_requires='>=3.5',
     install_requires=[
         'GitPython ~= 2.1.8',
-        'plain_obj ~= 0.1.2'
     ],
     zip_safe=False,
     entry_points = {
