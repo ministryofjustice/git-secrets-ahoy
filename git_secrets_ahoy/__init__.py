@@ -24,13 +24,24 @@ def parse_args(args: List[str]) -> types.Context:
     parser.add_argument('path',
                         type=str, default=".", nargs='?',
                         help='Path to git repository')
-    parser.add_argument('--staged',
-                        action='store_true',
-                        help='Check changes staged into the git index')
+    group = parser.add_argument_group(
+        "target", "Use the following to select what to check"
+    )
+    group.add_argument('--staged', action='store_true',
+                       help='Check changes staged into the git index')
+    group.add_argument('--all', action='store_true',
+                       help='Check entire history of all branches')
     parsed = parser.parse_args(args)
+
+    target: types.Target.Type
+    if parsed.staged:
+        target = types.Target.Staged()
+    else:
+        target = types.Target.All()
+
     return types.Context(
         path=parsed.path,
-        target=("staged",)
+        target=target
     )
 
 
@@ -47,15 +58,14 @@ def find_relevant_commits(repo: git.Repo) -> Iterable[git.Commit]:
 
 def find_secrets(commits: Iterable[git.Commit]) -> Iterable[types.Secret]:
     for commit in commits:
-        for diff_secret in check_commit(commit):
-            yield types.Secret(commit=commit, **diff_secret._asdict())
+        yield from check_commit(commit)
 
 
-def check_commit(commit: git.Commit) -> Iterable[types.Match]:
+def check_commit(commit: git.Commit) -> Iterable[types.Secret]:
     for diff_obj in commit_diff(commit):
         patch = diff_obj.diff.decode(git.compat.defenc, errors='replace')
 
-        yield from check_entropy(diff_obj, patch)
+        yield from check_entropy(patch, diff_obj, commit)
 
 
 def commit_diff(commit: git.Commit) -> git.DiffIndex:
@@ -79,14 +89,17 @@ def listify(
     return wrapper
 
 
-def check_entropy(diff_obj: git.Diff, patch: str) -> Iterable[types.Match]:
+def check_entropy(
+    patch: str, diff: git.Diff, commit: git.Commit
+) -> Iterable[types.Secret]:
     matches = collect_entropic_strings(patch)
     if matches:
-        yield types.Match(
-            diff=diff_obj,
+        yield types.Secret(
+            commit=commit,
+            diff=diff,
             patch=patch,
             matches=matches,
-            reason=types.SecretReason.ENTROPY,
+            reason=types.Reason.HighEntropy(),
         )
 
 
@@ -154,7 +167,7 @@ def format_output(secrets: Iterable[types.Secret]) -> Iterable[str]:
                 "path": secret.path,
                 "patch": secret.patch,
                 "matches": secret.matches,
-                "reason": secret.reason.value,
+                "reason": str(secret.reason),
             }
         )
 

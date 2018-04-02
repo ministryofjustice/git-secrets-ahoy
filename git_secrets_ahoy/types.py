@@ -1,42 +1,52 @@
-import datetime as datetime_module
+from datetime import datetime as datetime_class
 import enum
 import typing
 
+from dataclasses import dataclass, asdict
 import git
 
+class Target:
+    @dataclass(frozen=True)
+    class Staged:
+        pass
 
-class Context(typing.NamedTuple):
+    @dataclass(frozen=True)
+    class All:
+        pass
+
+    @dataclass(frozen=True)
+    class Revisions:
+        since: typing.Optional[datetime_class]
+        until: typing.Optional[datetime_class]
+
+    Type = typing.Union[Staged, All, Revisions]
+
+@dataclass(frozen=True)
+class Context:
     path: str
-    target: "Target"
+    target: Target.Type
 
+class Reason:
+    @dataclass(frozen=True)
+    class HighEntropy:
+        def __str__(self) -> str:
+            return "high-entropy"
 
-Target = typing.Union["Staged", "All", "Revisions"]
+    @dataclass(frozen=True)
+    class RegexMatch:
+        rule: str
+        def __str__(self) -> str:
+            return "regex:%s" % self.rule
 
+    Type = typing.Union[HighEntropy, RegexMatch]
 
-class Staged(typing.NamedTuple):
-    pass
-
-
-class All(typing.NamedTuple):
-    pass
-
-
-class Revisions(typing.NamedTuple):
-    since: str
-    until: str
-
-
-class SecretReason(enum.Enum):
-    ENTROPY = 'high-entropy'
-    REGEX = 'regex-match'
-
-
-class Secret(typing.NamedTuple):
+@dataclass(frozen=True)
+class Secret:
     commit: git.Commit
     diff: git.Diff
     patch: str
-    matches: typing.List[str]
-    reason: SecretReason
+    matches: typing.Collection[str]
+    reason: Reason
 
     @property
     def path(self) -> str:
@@ -47,15 +57,9 @@ class Secret(typing.NamedTuple):
         return self.commit.hexsha
 
     @property
-    def datetime(self) -> datetime_module.datetime:
+    def datetime(self) -> datetime_class:
         return self.commit.committed_datetime
 
     @property
     def message(self) -> str:
         return self.commit.message
-
-class Match(typing.NamedTuple):
-    diff: git.Diff
-    patch: str
-    matches: typing.List[str]
-    reason: SecretReason
