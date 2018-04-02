@@ -37,7 +37,7 @@ jobs:
           name: Execute python typechecker
           command: |
             mkdir -p test-results
-            pipenv run mypy --junit-xml=test-results/mypy.xml
+            pipenv run mypy . --junit-xml=test-results/mypy.xml
       - run:
           name: Execute python tests
           command: |
