@@ -28,6 +28,7 @@ jobs:
           name: Setup python dependencies
           command: |
             pipenv sync --dev
+            pipenv clean
       - save_cache:
           key: cachet-{{ checksum "Pipfile.lock" }}
           paths:

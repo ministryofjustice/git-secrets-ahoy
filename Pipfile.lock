@@ -14,13 +14,6 @@
         ]
     },
     "default": {
-        "dataclasses": {
-            "hashes": [
-                "sha256:3f20420c953ecf4c4df68f3aaee48dea69a87935aaeceffce1176b5366b08f1e",
-                "sha256:7127de1976d5c6d4f374c9826aefe6564b612690a60ca957cbd5c64483326dc1"
-            ],
-            "version": "==0.5"
-        },
         "e1839a8": {
             "editable": true,
             "path": "."

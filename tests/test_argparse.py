@@ -22,7 +22,6 @@ def test_path_can_be_set():
 def test_target_staged():
     context = gsa.parse_args(["--staged"])
     assert context.target == gsa.types.Target.Staged()
-    assert context.target != gsa.types.Target.All()
 
 def test_target_all():
     context = gsa.parse_args(["--all"])

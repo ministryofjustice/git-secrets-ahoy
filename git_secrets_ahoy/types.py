@@ -2,51 +2,43 @@ from datetime import datetime as datetime_class
 import enum
 import typing
 
-from dataclasses import dataclass, asdict
 import git
 
 class Target:
-    @dataclass(frozen=True)
-    class Staged:
+    class Staged(typing.NamedTuple):
         pass
 
-    @dataclass(frozen=True)
-    class All:
+    class All(typing.NamedTuple):
         pass
 
-    @dataclass(frozen=True)
-    class Revisions:
+    class Revisions(typing.NamedTuple):
         since: typing.Optional[datetime_class]
         until: typing.Optional[datetime_class]
 
     Type = typing.Union[Staged, All, Revisions]
 
-@dataclass(frozen=True)
-class Context:
+class Context(typing.NamedTuple):
     path: str
     target: Target.Type
 
 class Reason:
-    @dataclass(frozen=True)
-    class HighEntropy:
+    class HighEntropy(typing.NamedTuple):
         def __str__(self) -> str:
             return "high-entropy"
 
-    @dataclass(frozen=True)
-    class RegexMatch:
+    class RegexMatch(typing.NamedTuple):
         rule: str
         def __str__(self) -> str:
             return "regex:%s" % self.rule
 
     Type = typing.Union[HighEntropy, RegexMatch]
 
-@dataclass(frozen=True)
-class Secret:
+class Secret(typing.NamedTuple):
     commit: git.Commit
     diff: git.Diff
     patch: str
     matches: typing.Collection[str]
-    reason: Reason
+    reason: Reason.Type
 
     @property
     def path(self) -> str:
@@ -63,3 +55,24 @@ class Secret:
     @property
     def message(self) -> str:
         return self.commit.message
+
+
+def _namedtuple_eq(a: object, b: object) -> bool:
+    """
+    An equality comparison for namedtuples which
+    cares about type as well as value
+    """
+    if type(a) != type(b):
+        return False
+    return tuple.__eq__(a, b)
+
+for klass in [
+    Target.Staged,
+    Target.All,
+    Target.Revisions,
+    Context,
+    Reason.HighEntropy,
+    Reason.RegexMatch,
+    Secret
+]:
+    setattr(klass, "__eq__", _namedtuple_eq)
