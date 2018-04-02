@@ -1,4 +1,4 @@
-from datetime import datetime
+import datetime as datetime_module
 import enum
 import typing
 
@@ -39,17 +39,23 @@ class Secret(typing.NamedTuple):
     reason: SecretReason
 
     @property
-    def path(self):
+    def path(self) -> str:
         return self.diff.b_path if self.diff.b_path else self.diff.a_path
 
     @property
-    def ref(self):
+    def ref(self) -> str:
         return self.commit.hexsha
 
     @property
-    def datetime(self):
-        return datetime.fromtimestamp(self.commit.committed_date)
+    def datetime(self) -> datetime_module.datetime:
+        return self.commit.committed_datetime
 
     @property
-    def message(self):
+    def message(self) -> str:
         return self.commit.message
+
+class Match(typing.NamedTuple):
+    diff: git.Diff
+    patch: str
+    matches: typing.List[str]
+    reason: SecretReason
