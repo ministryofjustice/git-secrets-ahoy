@@ -1,7 +1,7 @@
 from setuptools import setup
 
 try:
-    import pypandoc
+    import pypandoc # type: ignore
     long_description = pypandoc.convert('README.md', 'rst')
 except (IOError, ImportError) as ex:
     print("Pandoc failed", ex)
@@ -20,7 +20,6 @@ setup(
     python_requires='>=3.5',
     install_requires=[
         'GitPython ~= 2.1.8',
-        'plain_obj ~= 0.1.2'
     ],
     zip_safe=False,
     entry_points = {
