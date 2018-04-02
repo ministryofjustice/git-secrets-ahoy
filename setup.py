@@ -1,7 +1,7 @@
 from setuptools import setup
 
 try:
-    import pypandoc
+    import pypandoc # type: ignore
     long_description = pypandoc.convert('README.md', 'rst')
 except (IOError, ImportError) as ex:
     print("Pandoc failed", ex)
