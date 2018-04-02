@@ -27,8 +27,6 @@ jobs:
       - run:
           name: Setup python dependencies
           command: |
-            pip install --user pipenv
-            PATH=~/.local/bin:$PATH
             pipenv sync --dev
       - save_cache:
           key: cache-{{ checksum "Pipfile.lock" }}
@@ -36,10 +34,15 @@ jobs:
             - ~/.local
             - ~/.cache
       - run:
+          name: Execute python typechecker
+          command: |
+            mkdir -p test-results
+            pipenv run mypy --junit-xml=test-results/mypy.xml
+      - run:
           name: Execute python tests
           command: |
-            PATH=~/.local/bin:$PATH
-            pipenv run pytest --junit-xml=test-results/junit.xml
+            mkdir -p test-results
+            pipenv run pytest --junit-xml=test-results/pytest.xml
       - store_test_results:
           path: test-results
 
