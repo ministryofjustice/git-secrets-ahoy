@@ -66,6 +66,15 @@ def _namedtuple_eq(a: object, b: object) -> bool:
         return False
     return tuple.__eq__(a, b)
 
+def _namedtuple_ne(a: object, b: object) -> bool:
+    """
+    An inequality comparison for namedtuples which
+    cares about type as well as value
+    """
+    if type(a) != type(b):
+        return True
+    return tuple.__ne__(a, b)
+
 for klass in [
     Target.Staged,
     Target.All,
@@ -76,3 +85,4 @@ for klass in [
     Secret
 ]:
     setattr(klass, "__eq__", _namedtuple_eq)
+    setattr(klass, "__ne__", _namedtuple_ne)
